@@ -1,0 +1,62 @@
+[
+    {
+        "id": 1,
+        "nickname": "Gamer01",
+        "email": "gamer01@example.com",
+        "password": "password123"
+    },
+    {
+        "id": 2,
+        "nickname": "PlayerTwo",
+        "email": "playertwo@example.com",
+        "password": "securepass456"
+    },
+    {
+        "id": 3,
+        "nickname": "EpicGamer",
+        "email": "epicgamer@example.com",
+        "password": "mypassword789"
+    },
+    {
+        "id": 4,
+        "nickname": "NoobMaster",
+        "email": "noobmaster@example.com",
+        "password": "noobpass101"
+    },
+    {
+        "id": 5,
+        "nickname": "ProPlayer",
+        "email": "proplayer@example.com",
+        "password": "propass202"
+    },
+    {
+        "id": 6,
+        "nickname": "StealthNinja",
+        "email": "stealthninja@example.com",
+        "password": "ninja456"
+    },
+    {
+        "id": 7,
+        "nickname": "WarriorKing",
+        "email": "warriorking@example.com",
+        "password": "kingpass303"
+    },
+    {
+        "id": 8,
+        "nickname": "MageMaster",
+        "email": "magemaster@example.com",
+        "password": "magicpass404"
+    },
+    {
+        "id": 9,
+        "nickname": "RogueAssassin",
+        "email": "rogueassassin@example.com",
+        "password": "assassin505"
+    },
+    {
+        "id": 10,
+        "nickname": "HeroicKnight",
+        "email": "heroicknight@example.com",
+        "password": "knight606"
+    }
+]
