@@ -1,9 +1,11 @@
 package controllers
 
 import (
-	"api/models"
 	"api/database"
+	"api/models"
+	// "log"
 	"net/http"
+	"reflect"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +16,8 @@ func Users(ctx *gin.RouterGroup) {
     ctx.GET("", GetAllUsers)
     ctx.POST("", CreateUser)
 
-    ctx.GET("/:userId", GetUserById)
+    ctx.GET("/:userId", GetUser)
+    ctx.PUT("/:userId", UpdateUser)
     ctx.DELETE("/:userId", DeleteUser)
 }
 
@@ -32,7 +35,7 @@ func CreateUser(ctx *gin.Context) {
 
     err := ctx.ShouldBindJSON(&input);
     if err != nil {
-        ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input data" })
         return
     }
 
@@ -53,10 +56,10 @@ func CreateUser(ctx *gin.Context) {
         return
     }
 
-    ctx.Status(http.StatusCreated)
+    ctx.Status(http.StatusAccepted)
 }
 
-func GetUserById(ctx *gin.Context) {
+func GetUser(ctx *gin.Context) {
     id, err := GetUserIdToUINT(ctx.Params)
     if err != nil {
         ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -72,6 +75,53 @@ func GetUserById(ctx *gin.Context) {
     ctx.JSON(http.StatusOK, target)
 }
 
+func UpdateUser(ctx *gin.Context) {
+    id, err := GetUserIdToUINT(ctx.Params)
+    if err != nil {
+        ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    var target models.User
+    if err := database.DB.First(&target, id).Error; err != nil {
+        ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+    var input models.UpdateUserDto
+
+    err = ctx.ShouldBindJSON(&input);
+    if err != nil || reflect.DeepEqual(input, (models.UpdateUserDto{})) {
+        if err != nil {
+            ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input data" })
+        } else {
+            ctx.JSON(http.StatusBadRequest, gin.H{"error": "No fields to update"})
+        }
+        return
+    }
+
+    if input.Email != "" && input.Email != target.Email {
+        target.Email = input.Email
+    }
+
+    if input.Nickname != "" && input.Nickname != target.Nickname {
+        target.Nickname = input.Nickname
+    }
+
+    if input.Password != "" {
+        hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), 10)
+        if err != nil {
+            ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
+        target.Password = string(hashedPassword)
+    }
+
+    if err := database.DB.Save(&target).Error; err != nil {
+        ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+    ctx.Status(http.StatusAccepted)
+}
 
 func DeleteUser(ctx *gin.Context) {
     id, err := GetUserIdToUINT(ctx.Params)
@@ -94,13 +144,14 @@ func DeleteUser(ctx *gin.Context) {
     ctx.Status(http.StatusNoContent)
 }
 
-func GetUserIdToUINT(params gin.Params) (int, error) {
+func GetUserIdToUINT(params gin.Params) (uint, error) {
     idStr := params.ByName("userId")
 
-    id, err := strconv.Atoi(idStr)
+    id, err := strconv.ParseUint(idStr, 10, 32)
     if err != nil {
         return 0, err
     }
-    return id, nil
+
+    return uint(id), nil
 }
 
